@@ -1,0 +1,7 @@
+# Python packages (install with: pip3 install -r requirements.txt)
+ryu
+eventlet==0.30.2
+# If ryu-manager fails with a setuptools/pkg_resources error, also run:
+#   pip3 install setuptools==67.6.1
+# Mininet and Open vSwitch come from apt, not pip:
+#   sudo apt install mininet openvswitch-switch iperf3 -y

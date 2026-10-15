@@ -18,4 +18,4 @@
 - When restarting an agent by hand at the `mininet>` prompt, use `--host-id=h2` (with `=`). The CLI replaces a lone `h2` word with 10.0.0.2, which makes the server create a separate 10.0.0.2 host and keeps h2 DOWN.
 - Baseline vs combined: controller flow/port stats expose the inner links (s1-s2, s2-s3) that host telemetry alone cannot see.
 
-Screenshots: add files under docs/screenshots/ and link them here.
+Screenshots: docs/screenshots/test2_idle.png, test3_4_load.png, test5_host_silent.png, test6_loss.png, test7_baseline.png

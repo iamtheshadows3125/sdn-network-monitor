@@ -65,3 +65,18 @@ def decode_packet(data):
         return pkt
     except (ValueError, UnicodeDecodeError, TypeError, AttributeError):
         return None
+
+# ======================= Added in Stage 2 (Person 2) =======================
+POLL_INTERVAL_S = 2.0                                          # controller stats poll period
+PORT_STATS_JSON = os.path.join(LOG_DIR, "port_stats.json")     # controller -> analysis (raw counters)
+PORT_STATS_CSV = os.path.join(LOG_DIR, "port_stats.csv")       # same data, appended (for experiments)
+STATUS_JSON = os.path.join(LOG_DIR, "status.json")             # analysis -> GUI (Person 3)
+ALERTS_CSV = os.path.join(LOG_DIR, "alerts.csv")               # one row per alert state change
+ANALYSIS_CSV = os.path.join(LOG_DIR, "analysis.csv")           # every cycle, every link/host
+THRESHOLDS_JSON = os.path.join(REPO_ROOT, "config", "thresholds.json")
+STATUS_LEVELS = ("NORMAL", "WARNING", "ALERT")
+
+
+def link_id(dpid, peer):
+    """Canonical link name, e.g. link_id(1, 'h1') -> 'h1-s1'; link_id(2, 's1') -> 's1-s2'."""
+    return "-".join(sorted(["s%d" % dpid, peer]))

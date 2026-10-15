@@ -1,0 +1,8 @@
+{
+  "warning_pct": 50,
+  "alert_pct": 80,
+  "loss_warning_pct": 5,
+  "loss_alert_pct": 20,
+  "interval_s": 1.0,
+  "stale_after_s": 6.0
+}

@@ -1,0 +1,13 @@
+scenario,mode,runs,detect_any_s,detect_alert_s,localized,false_alarms,resolve_s,util_s1s2_pct,util_truth_pct,util_error_pct,telemetry_loss_pct,telemetry_pkts_per_s,stats_polls_per_s
+aggregate,baseline,3,2.06,,0.0,0.0,,,97.2,,0.0,4.1,0.0
+aggregate,combined,3,1.73,2.4,1.0,0.0,0.07,100.0,97.17,2.83,0.0,4.12,3.0
+heavy,baseline,3,2.75,2.75,0.0,0.0,,,92.97,,0.0,4.07,0.0
+heavy,combined,4,2.58,3.08,1.0,0.0,0.17,92.9,92.73,0.23,0.0,4.05,3.0
+host_down,baseline,3,7.44,7.44,1.0,0.0,,,,,0.0,3.24,0.0
+host_down,combined,3,8.1,8.1,1.0,0.0,,0.0,,,0.0,3.28,3.0
+idle,baseline,3,,,,0.0,,,,,0.0,4.0,0.0
+idle,combined,3,,,,0.0,,0.0,,,0.0,4.03,3.0
+loss,baseline,3,4.75,8.09,1.0,0.0,,,,,4.9,3.86,0.0
+loss,combined,3,6.09,9.1,1.0,0.0,,0.0,,,7.34,3.78,3.0
+moderate,baseline,3,1.41,,0.0,0.0,,,50.0,,0.0,4.08,0.0
+moderate,combined,3,3.08,,1.0,0.0,,51.5,50.0,1.5,0.0,4.0,3.0

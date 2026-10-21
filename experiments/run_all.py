@@ -22,7 +22,6 @@ for r in range(a.repeats):
     for sc in a.scenarios:
         for mode in ("combined", "baseline"):
             print("\n===== %s / %s / repeat %d =====" % (sc, mode, r + 1), flush=True)
-            subprocess.call(["mn", "-c"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             subprocess.call([sys.executable, os.path.join(HERE, "run_experiment.py"), "--scenario", sc,
                              "--mode", mode, "--duration", str(a.duration)])
 print("\nAll runs finished. Next: python3 experiments/analyze_results.py")

@@ -58,7 +58,7 @@ async function tick(){
       Object.entries(st.links).map(([id,l])=>`<tr><td>${id}</td><td><span class="bar"><i style="width:${Math.min(l.utilization_pct,100)}%;background:${COL[l.status]||COL.UNKNOWN}"></i></span> ${l.utilization_pct.toFixed(1)}%</td><td>${l.tx_rate_mbps.toFixed(2)} / ${l.rx_rate_mbps.toFixed(2)}</td><td>${pill(l.status)}</td></tr>`).join('');
     document.getElementById('hosts').innerHTML='<tr><th>Host</th><th>Liveness</th><th>Loss</th><th>Tx Mbps</th><th>Status</th></tr>'+
       Object.entries(st.hosts).map(([id,h])=>`<tr><td>${id}</td><td>${h.liveness}</td><td>${h.loss_pct.toFixed(1)}%</td><td>${h.tx_rate_mbps.toFixed(2)}</td><td>${pill(h.status)}</td></tr>`).join('');
-    const al=await (await fetch('/api/alerts?n=12')).json();
+    const al=await (await fetch('/api/alerts?n=20')).json();
     document.getElementById('alerts').innerHTML='<tr><th>Time</th><th>Level</th><th>Message</th></tr>'+
       al.map(a=>`<tr><td>${new Date(a.ts*1000).toLocaleTimeString()}</td><td>${a.level==='RESOLVED'?'<span class="pill" style="background:#2e8b57">RESOLVED</span>':pill(a.level)}</td><td>${a.message}</td></tr>`).join('')||'<tr><td colspan=3>no alerts yet</td></tr>';
   }catch(e){document.getElementById('warn').textContent='Cannot reach dashboard server';}

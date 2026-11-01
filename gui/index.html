@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Network Monitor</title>
+<style>
+ body{font-family:Arial,sans-serif;margin:0;background:#f4f8f9;color:#1b2a35}
+ header{padding:14px 24px;color:#fff;display:flex;justify-content:space-between;align-items:center;transition:background .3s}
+ header h1{margin:0;font-size:22px} .badge{background:rgba(255,255,255,.25);padding:4px 10px;border-radius:12px;margin-left:8px;font-size:14px}
+ main{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px 24px}
+ .card{background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+ .card h2{margin:0 0 8px;font-size:16px;color:#0b3c49} table{width:100%;border-collapse:collapse;font-size:14px}
+ td,th{padding:4px 6px;text-align:left;border-bottom:1px solid #e3ecee} .pill{padding:1px 8px;border-radius:10px;color:#fff;font-size:12px}
+ .bar{background:#e3ecee;border-radius:4px;height:10px;width:120px;display:inline-block;vertical-align:middle}.bar i{display:block;height:10px;border-radius:4px}
+ .full{grid-column:1/3} #warn{color:#c8553d;font-weight:bold;padding:0 24px}
+</style></head><body>
+<header id="hdr" style="background:#8a949b"><h1>Network Monitoring and Alert System <span class="badge" id="mode">-</span></h1><div id="overall" style="font-size:22px;font-weight:bold">-</div></header>
+<div id="warn"></div>
+<main>
+ <div class="card"><h2>Topology (link colour = status)</h2><svg id="topo" viewBox="0 0 680 310" width="100%"></svg></div>
+ <div class="card"><h2>Utilization history (last 90 s)</h2><canvas id="chart" width="620" height="290" style="width:100%"></canvas></div>
+ <div class="card"><h2>Links</h2><table id="links"></table></div>
+ <div class="card"><h2>Hosts (telemetry)</h2><table id="hosts"></table></div>
+ <div class="card full"><h2>Alerts (newest first)</h2><table id="alerts"></table></div>
+</main>
+<script>
+const COL={NORMAL:'#2e8b57',WARNING:'#f2a541',ALERT:'#c8553d',UNKNOWN:'#8a949b'};
+const NODES={h1:[80,60],h2:[80,250],h3:[330,45],h4:[480,45],h5:[600,270],s1:[200,155],s2:[400,155],s3:[600,155]};
+const LINKS={'h1-s1':['h1','s1'],'h2-s1':['h2','s1'],'h3-s2':['h3','s2'],'h4-s2':['h4','s2'],'h5-s3':['h5','s3'],'s1-s2':['s1','s2'],'s2-s3':['s2','s3']};
+const hist={}; const LINECOL=['#0e7c86','#f2a541','#2f6690','#c8553d','#3a7d44','#6c757d','#7b4b94'];
+const pill=s=>`<span class="pill" style="background:${COL[s]||COL.UNKNOWN}">${s}</span>`;
+function drawTopo(st){
+  let h='';
+  for(const [id,[a,b]] of Object.entries(LINKS)){const l=st.links[id],c=COL[l?l.status:'UNKNOWN'],[x1,y1]=NODES[a],[x2,y2]=NODES[b];
+    h+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="5"/>`;
+    h+=`<text x="${(x1+x2)/2}" y="${(y1+y2)/2-6}" font-size="12" text-anchor="middle" fill="#1b2a35">${l?l.utilization_pct.toFixed(0)+'%':''}</text>`;}
+  for(const [n,[x,y]] of Object.entries(NODES)){
+    if(n[0]==='s') h+=`<circle cx="${x}" cy="${y}" r="20" fill="#2f6690"/><text x="${x}" y="${y+5}" fill="#fff" text-anchor="middle" font-size="14">${n}</text>`;
+    else {const hs=st.hosts[n],c=COL[hs?hs.status:'UNKNOWN'];
+      h+=`<rect x="${x-26}" y="${y-16}" width="52" height="32" rx="6" fill="${c}"/><text x="${x}" y="${y+5}" fill="#fff" text-anchor="middle" font-size="14">${n}${n==='h5'?' (srv)':''}</text>`;}}
+  document.getElementById('topo').innerHTML=h;}
+function drawChart(){
+  const cv=document.getElementById('chart'),g=cv.getContext('2d'),W=cv.width,H=cv.height,P=34;
+  g.clearRect(0,0,W,H);g.font='12px Arial, sans-serif';g.strokeStyle='#cfdadd';g.fillStyle='#5b6770';
+  for(const v of [0,25,50,75,100]){const y=H-P-(H-2*P)*v/100;g.beginPath();g.moveTo(P,y);g.lineTo(W-8,y);g.stroke();g.fillText(v+'%',2,y+4);}
+  g.setLineDash([5,4]);for(const [v,c] of [[50,COL.WARNING],[80,COL.ALERT]]){const y=H-P-(H-2*P)*v/100;g.strokeStyle=c;g.beginPath();g.moveTo(P,y);g.lineTo(W-8,y);g.stroke();}g.setLineDash([]);
+  Object.keys(LINKS).forEach((id,i)=>{const a=hist[id]||[];g.strokeStyle=LINECOL[i];g.lineWidth=2;g.beginPath();
+    a.forEach((v,k)=>{const x=P+(W-P-8)*k/89,y=H-P-(H-2*P)*Math.min(v,100)/100;k?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();
+    g.fillStyle=LINECOL[i];g.fillRect(P+i*88,H-16,10,10);g.fillStyle='#1b2a35';g.fillText(id,P+i*88+14,H-7);});}
+async function tick(){
+  try{
+    const st=await (await fetch('/api/status')).json(), hdr=document.getElementById('hdr');
+    if(st.error){document.getElementById('warn').textContent=st.error;return;}
+    hdr.style.background=COL[st.overall]||COL.UNKNOWN;
+    document.getElementById('overall').textContent=st.overall;document.getElementById('mode').textContent=st.mode;
+    document.getElementById('warn').textContent=(st.controller_stale&&st.mode==='combined'?'Controller data is stale (is ryu-manager running?)  ':'')+(st.app_stale?'Telemetry data is stale (is the server running?)':'');
+    drawTopo(st);
+    for(const id of Object.keys(LINKS)){(hist[id]=hist[id]||[]).push(st.links[id]?st.links[id].utilization_pct:0);if(hist[id].length>90)hist[id].shift();}
+    drawChart();
+    document.getElementById('links').innerHTML='<tr><th>Link</th><th>Utilization</th><th>Mbps (tx/rx)</th><th>Status</th></tr>'+
+      Object.entries(st.links).map(([id,l])=>`<tr><td>${id}</td><td><span class="bar"><i style="width:${Math.min(l.utilization_pct,100)}%;background:${COL[l.status]||COL.UNKNOWN}"></i></span> ${l.utilization_pct.toFixed(1)}%</td><td>${l.tx_rate_mbps.toFixed(2)} / ${l.rx_rate_mbps.toFixed(2)}</td><td>${pill(l.status)}</td></tr>`).join('');
+    document.getElementById('hosts').innerHTML='<tr><th>Host</th><th>Liveness</th><th>Loss</th><th>Tx Mbps</th><th>Status</th></tr>'+
+      Object.entries(st.hosts).map(([id,h])=>`<tr><td>${id}</td><td>${h.liveness}</td><td>${h.loss_pct.toFixed(1)}%</td><td>${h.tx_rate_mbps.toFixed(2)}</td><td>${pill(h.status)}</td></tr>`).join('');
+    const al=await (await fetch('/api/alerts?n=20')).json();
+    document.getElementById('alerts').innerHTML='<tr><th>Time</th><th>Level</th><th>Message</th></tr>'+
+      al.map(a=>`<tr><td>${new Date(a.ts*1000).toLocaleTimeString()}</td><td>${a.level==='RESOLVED'?'<span class="pill" style="background:#2e8b57">RESOLVED</span>':pill(a.level)}</td><td>${a.message}</td></tr>`).join('')||'<tr><td colspan=3>no alerts yet</td></tr>';
+  }catch(e){document.getElementById('warn').textContent='Cannot reach dashboard server';}
+}
+tick();setInterval(tick,1000);
+</script></body></html>

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tiny dashboard server (Python standard library only - nothing to install).
+"""Tiny dashboard server (Python standard library only ).
     python3 gui/server.py                      # reads logs/status.json + logs/alerts.csv
     python3 gui/server.py --log-dir /tmp/netmon_mock   # use with gui/mock_feed.py
 Open http://localhost:8080 in a browser."""
@@ -18,8 +18,8 @@ def make_handler(log_dir):
     class Handler(BaseHTTPRequestHandler):
         def _send(self, code, body, ctype):
             data = body if isinstance(body, bytes) else body.encode()
-            self.send_response(code)
-            self.send_header("Content-Type", ctype)
+            self.send_response(code) """ HTTP response status, such as 200 or 404.""" 
+            self.send_header("Content-Type", ctype) """Content type, such as HTML, JSON or plain text."""
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Cache-Control", "no-store")
             self.end_headers()

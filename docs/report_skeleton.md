@@ -1,4 +1,4 @@
-# Report skeleton (fill in as you go - the rubric has 6 marks for documentation + 5 for evaluation)
+# Report skeleton 
 1. **Problem statement and objectives** (reuse the Phase 1 slides)
 2. **Literature survey** (the papers you actually read, one paragraph each, gap -> our approach)
 3. **System architecture** (diagram, components, data flow, shared formats - copy from docs/spec.md)
